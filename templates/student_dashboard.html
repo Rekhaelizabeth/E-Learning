@@ -1,0 +1,130 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  
+  <div class="collapse navbar-collapse justify-content-end">
+      {% if user.is_authenticated %}
+          <span class="navbar-text mr-3"> {{ user.username }}</span>
+       
+      {% else %}
+          <a href="{% url 'login' %}" class="btn btn-outline-primary">Login</a>
+      {% endif %}
+  </div>
+</nav>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="container my-4">
+    <h2 class="text-center mb-4">{{ request.user.userprofile.role|title }} Dashboard</h2>
+ 
+   
+    <div class="text-center mb-4">
+        <button id="allCoursesBtn" class="btn btn-primary mx-2">All Courses</button>
+        <button id="enrolledCoursesBtn" class="btn btn-secondary mx-2">Enrolled Courses</button>
+    </div>
+
+    <div id="allCoursesSection" class="course-section">
+        <h3 class="mb-3">Available Courses</h3>
+        <table class="table table-bordered table-hover">
+            <thead class="thead-light">
+                <tr>
+                    <th>Course Name</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Price</th>
+                    <th>Instructor</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for course in available_courses %}
+                <tr>
+                    <td>{{ course.title }}</td>
+                    <td>{{ course.start_date }}</td>
+                    <td>{{ course.end_date }}</td>
+                    <td>${{ course.price }}</td>
+                    <td>{{ course.instructor.username }}</td>
+                    <td>
+                        {% if course.id in enrolled_course_ids %}
+                            <span class="btn btn-secondary">Already Enrolled</span>
+                        {% else %}
+                            <a href="{% url 'enroll_in_course' course.id %}" class="btn btn-success">Enroll</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">No available courses at the moment.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div id="enrolledCoursesSection" class="course-section" style="display: none;">
+        <h3 class="mb-3">Your Enrolled Courses</h3>
+        <table class="table table-bordered table-hover">
+            <thead class="thead-light">
+                <tr>
+                    <th>Course Name</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Price</th>
+                    <th>Instructor</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for course in enrolled_courses %}
+                <tr>
+                    <td><a href="{% url 'view_course' course.id %}">{{ course.title }}</a></td>
+                    <td>{{ course.start_date }}</td>
+                    <td>{{ course.end_date }}</td>
+                    <td>${{ course.price }}</td>
+                    <td>{{ course.instructor.username }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">You have not enrolled in any courses yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<div>
+  <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
+</div>
+
+{% if last_accessed_course %}
+    <p>Your last accessed course: <a href="{% url 'view_course' last_accessed_course.id %}">{{ last_accessed_course.title }}</a></p>
+{% else %}
+    <p>You haven't accessed any course yet.</p>
+{% endif %}
+
+<script>
+    document.getElementById('allCoursesBtn').addEventListener('click', function() {
+        document.getElementById('allCoursesSection').style.display = 'block';
+        document.getElementById('enrolledCoursesSection').style.display = 'none';
+        this.classList.add('btn-primary');
+        this.classList.remove('btn-secondary');
+        document.getElementById('enrolledCoursesBtn').classList.add('btn-secondary');
+        document.getElementById('enrolledCoursesBtn').classList.remove('btn-primary');
+    });
+
+    document.getElementById('enrolledCoursesBtn').addEventListener('click', function() {
+        document.getElementById('allCoursesSection').style.display = 'none';
+        document.getElementById('enrolledCoursesSection').style.display = 'block';
+        this.classList.add('btn-primary');
+        this.classList.remove('btn-secondary');
+        document.getElementById('allCoursesBtn').classList.add('btn-secondary');
+        document.getElementById('allCoursesBtn').classList.remove('btn-primary');
+    });
+</script>
+
+</body>
+</html>
